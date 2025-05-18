@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/247860820630692335/3de3c93081264aad928186e0e8a140c6/artifacts
+deleted_time: 1747575721415
+end_time: 1747573209425
+entry_point_name: ''
+experiment_id: '247860820630692335'
+lifecycle_stage: deleted
+run_id: 3de3c93081264aad928186e0e8a140c6
+run_name: train Logistic Regression Model
+run_uuid: 3de3c93081264aad928186e0e8a140c6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747573206637
+status: 3
+tags: []
+user_id: heshamelsherif
