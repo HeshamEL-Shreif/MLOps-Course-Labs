@@ -8,7 +8,7 @@ def monitoring(name):
     logger = setup_logging()
     try:
 
-        mlflow.set_tracking_uri("http://127.0.0.1:5001")
+        mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
         exp = mlflow.set_experiment(name)
         logger.info(f"Experiment created with ID: {exp.experiment_id}")

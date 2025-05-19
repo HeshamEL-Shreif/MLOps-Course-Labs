@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/247860820630692335/65f0d0c4292041c1ad9930e801971568/artifacts
+end_time: 1747642217789
+entry_point_name: ''
+experiment_id: '247860820630692335'
+lifecycle_stage: active
+run_id: 65f0d0c4292041c1ad9930e801971568
+run_name: svm Model
+run_uuid: 65f0d0c4292041c1ad9930e801971568
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747642214572
+status: 3
+tags: []
+user_id: heshamelsherif
