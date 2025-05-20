@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load the model
-path = 'app/svm_model.pkl'
+path = 'svm_model.pkl'
 try:
     model = joblib.load(path)
     logging.info(f"Model loaded from {path}")
