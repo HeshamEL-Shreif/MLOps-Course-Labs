@@ -5,6 +5,8 @@ import numpy as np
 import pickle
 import logging
 import joblib
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,6 +22,7 @@ except Exception as e:
 
 app = FastAPI(title="Churn_Modeling Classifier API")
 logging.info("FastAPI app initialized")
+instrumentator = Instrumentator().instrument(app).expose(app)
 
 
 class InputData(BaseModel):
