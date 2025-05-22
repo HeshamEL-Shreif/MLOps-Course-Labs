@@ -62,15 +62,16 @@ jobs:
         docker build -t $IMAGE_URI .
         docker push $IMAGE_URI
 
-    - name: Deploy to Amazon ECS
-      if: github.ref == 'refs/heads/main'
-      run: |
-        curl -X POST https://${{ secrets.EC2_HOST }}/update \
-          -H "Authorization: Bearer ${{ secrets.EC2_TRIGGER_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "image": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{env.IMAGE_TAG}}"
-          }'
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }} 
+        username: ${{ secrets.EC2_USER }} 
+        key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  
+        script: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          docker pull ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+  
     - name: Prepare deployment directory
       run: |
         mkdir -p hesham
