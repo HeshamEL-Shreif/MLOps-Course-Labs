@@ -1,0 +1,72 @@
+name: FastAPI SVM CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: churn-model-api
+  IMAGE_TAG: hesham0955
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Check Python syntax
+      run: python -m py_compile app.py
+
+    - name: Run unit tests with pytest
+      run: pytest tests/
+
+    - name: Health check (basic)
+      run: |
+        uvicorn app:app --host 0.0.0.0 --port 8000 &
+        sleep 5
+        curl --fail http://localhost:8000/health || exit 1
+        pkill uvicorn
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push Docker image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        docker build -t $IMAGE_URI .
+        docker push $IMAGE_URI
+
+    - name: Trigger container update on EC2 v
+      if: github.ref == 'refs/heads/main'
+      run: |
+        curl -X POST http://${{ secrets.EC2_HOST }}/update \
+            -H "Authorization: Bearer ${{ secrets.EC2_TRIGGER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "image": "${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+            }'

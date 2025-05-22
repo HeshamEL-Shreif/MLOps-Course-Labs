@@ -6,6 +6,7 @@ import pickle
 import logging
 import joblib
 from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi.responses import JSONResponse
 
 
 logging.basicConfig(level=logging.INFO)
@@ -41,8 +42,8 @@ def predict(data: InputData):
     expected_features = 13  
     if len(data.features) != expected_features:
         logging.warning(f"Expected {expected_features} features, got {len(data.features)}")
-        return {"error": f"Expected {expected_features} features"}
-    
+        return JSONResponse(status_code=400, content={"error": "Expected 13 features"})
+        
     logging.info(f"Prediction request received with features: {data.features}")
     features = np.array(data.features).reshape(1, -1)
     try:
