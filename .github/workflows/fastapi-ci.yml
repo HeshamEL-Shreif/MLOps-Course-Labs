@@ -74,6 +74,7 @@ jobs:
           docker stop churn-prediction || true
           docker rm churn-prediction || true
           docker run -d -p 80:8000 --name churn-prediction ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          
           mkdir -p hesham
           cd hesham
           if [ ! -d "MLOps-Course-Labs" ]; then
