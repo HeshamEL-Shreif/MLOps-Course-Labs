@@ -67,7 +67,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }} 
         username: ${{ secrets.EC2_USER }} 
-        key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  
+        key: ${{ secrets.EC2_SSH }}  
         script: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           docker pull ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
