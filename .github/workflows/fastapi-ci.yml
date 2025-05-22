@@ -65,17 +65,21 @@ jobs:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.EC2_HOST }} 
-        username: ${{ secrets.EC2_USER }} 
-        key: ${{ secrets.EC2_SSH }}  
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH }}
         script: |
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          docker pull ${{ secrets.AWS_ACCESS_KEY_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-  
-    - name: Prepare deployment directory
-      run: |
-        mkdir -p hesham
-        cd hesham
-        git clone https://github.com/HeshamEL-Shreif/MLOps-Course-Labs.git
-        cd MLOps-Course-Labs
-        docker-compose up -d --build
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker stop churn-prediction || true
+          docker rm churn-prediction || true
+          docker run -d -p 80:8000 --name churn-prediction ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          mkdir -p hesham
+          cd hesham
+          if [ ! -d "MLOps-Course-Labs" ]; then
+            git clone https://github.com/HeshamEL-Shreif/MLOps-Course-Labs.git
+          else
+            cd MLOps-Course-Labs && git pull
+          fi
+          cd MLOps-Course-Labs
+          docker-compose up -d --build
