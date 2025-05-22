@@ -46,7 +46,7 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-access-kepoy-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
@@ -61,3 +61,12 @@ jobs:
         IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
         docker build -t $IMAGE_URI .
         docker push $IMAGE_URI
+
+    - name: Deploy to Amazon ECS
+      if: github.ref == 'refs/heads/main'
+      run: |
+        curl -X POST https://${{ secrets.EC2_HOST }}/update \
+          -H "Content-Type: application/json" \
+          -d '{
+            "image": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          }'
